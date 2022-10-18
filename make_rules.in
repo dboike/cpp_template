@@ -23,8 +23,10 @@ INSTALL_CMD=\
 OBJFILES :=$(subst $(SRC_DIR),$(OBJ_DIR),$(patsubst %.cpp,%.o,$(SOURCES)))
 OBJFILES_TEST :=$(subst $(TEST_DIR),$(OBJ_DIR_TEST),$(patsubst %.cpp,%.o,$(SOURCES_TEST)))
 OBJFILES_TEST += $(subst $(OBJ_DIR)/main.o,,$(OBJFILES))
-.PHONY: all test 
-all: build
+
+.PHONY: all test build
+
+all: build test
 
 .PHONY: build
 build: $(IMAGE)
