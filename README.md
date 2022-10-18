@@ -4,3 +4,6 @@ Template for creating CPP projects with gtest support.  This is intended to be a
 All source files added to the src/ folder are expected to have a companion ".h" file of the same name.
 
 All files in src/ are expected to have unit test code in the test/ folder.
+
+# Dependencies
+This project assues you have installed googletest (git clone https://github.com/google/googletest.git)
