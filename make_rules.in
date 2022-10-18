@@ -12,7 +12,7 @@ endif
 
 CXXFLAGS += -g -O2 -Wall -c -pedantic-errors 
 LDFLAGS_L = -L $(SYSLIB) $(LDFLAGS)
-LDFLAGS_TEST = -L /usr/local/lib -lgtest -L $(SYSLIB) $(LDFLAGS)
+LDFLAGS_TEST = -L /usr/local/lib -lgtest -L $(SYSLIB) -l pthread $(LDFLAGS)
 INCLUDES += -I $(SRC_DIR) -I /usr/local/include
 
 SOURCES_TEST=$(wildcard $(TEST_DIR)/*unittest.cpp)
