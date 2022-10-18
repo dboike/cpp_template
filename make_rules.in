@@ -1,0 +1,78 @@
+#
+# C / CPP compiler rules  CFLAGS and LDFLAGS can be customized.  Hoever,
+# the defines in this file are a very good start
+#
+
+ARCH := $(shell uname -m)
+ifeq ($(ARCH),x86_64)
+SYSLIB := /usr/lib/$(ARCH)-linux-gnu
+else
+SYSLIB := /usr/lib
+endif
+
+CXXFLAGS += -g -O2 -Wall -c -pedantic-errors 
+LDFLAGS_L = -L $(SYSLIB) $(LDFLAGS)
+LDFLAGS_TEST = -L /usr/local/lib -lgtest -L $(SYSLIB) $(LDFLAGS)
+INCLUDES += -I $(SRC_DIR) -I /usr/local/include
+
+SOURCES_TEST=$(wildcard $(TEST_DIR)/*unittest.cpp)
+
+INSTALL_CMD=\
+  @$(foreach i,$(1),install -Dvm 777 $i $(2)/;)
+
+OBJFILES :=$(subst $(SRC_DIR),$(OBJ_DIR),$(patsubst %.cpp,%.o,$(SOURCES)))
+OBJFILES_TEST :=$(subst $(TEST_DIR),$(OBJ_DIR_TEST),$(patsubst %.cpp,%.o,$(SOURCES_TEST)))
+OBJFILES_TEST += $(subst $(OBJ_DIR)/main.o,,$(OBJFILES))
+.PHONY: all test 
+all: build
+
+.PHONY: build
+build: $(IMAGE)
+
+$(TEMP_DIRS):
+	mkdir -p $@
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(SRC_DIR)/%.h | $(OBJ_DIR)
+	$(CXX) $(INCLUDES) -MM -o $(patsubst %.o,%.d,$@) -MT $@ $<
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $<
+
+$(IMAGE): $(OBJFILES) | $(IMAGE_DIR)
+	$(CXX) -o $@ $(OBJFILES) $(LDFLAGS_L) 
+
+$(OBJ_DIR_TEST)/%.o: $(TEST_DIR)/%.cpp | $(OBJ_DIR_TEST)
+	$(CXX) $(INCLUDES) -MM -o $(patsubst %.o,%.d,$@) -MT $@ $<
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $<
+
+$(IMAGE)-test: $(OBJFILES_TEST) | $(IMAGE_DIR)
+	$(CXX) -o $@ $(OBJFILES_TEST) $(LDFLAGS_TEST)
+
+test: $(IMAGE)-test
+	$(IMAGE)-test
+
+.PHONY: install-service
+install-service:
+ifdef SERVICE_NAME
+	-systemctl stop $(SERVICE_NAME).service
+	cp -v $(SERVICE_DIR)/$(SERVICE_NAME).service /etc/systemd/system/
+	cp -v $(SERVICE_DIR)/$(SERVICE_NAME).path  /etc/systemd/system/
+	systemctl start $(SERVICE_NAME).service
+	systemctl daemon-reload
+	systemctl enable $(SERVICE_NAME).service -l
+	systemctl status $(SERVICE_NAME).service --no-pager -l
+else
+	@echo No services defined: $(SERVICE_NAME)
+endif
+
+.PHONY: install
+install: $(IMAGE)
+	$(call INSTALL_CMD,$(INSTALL_FILES),$(INSTALL_DIR))
+	$(MAKE) install-service
+
+.PHONY: clean
+clean:
+	@rm -fr $(TEMP_DIRS) 
+
+%-print:
+	@echo $($(subst -print,,$@))
+
+include $(wildcard $(OBJ_DIR)/*.d)

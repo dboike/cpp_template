@@ -1,0 +1,14 @@
+#
+# Project variables.  These can be overridden, but
+# it is not recommended.  It is better for packages
+# to look consistent
+#
+BASE_DIR ?= $(CURDIR)
+OUT_DIR ?= $(BASE_DIR)/output
+SRC_DIR ?= $(BASE_DIR)/src
+OBJ_DIR ?= $(OUT_DIR)/obj
+OBJ_DIR_TEST ?= $(OUT_DIR)/obj_test
+TEST_DIR ?= $(BASE_DIR)/test
+IMAGE_DIR ?= $(OUT_DIR)/images
+INSTALL_DIR ?= /usr/local/bin
+TEMP_DIRS = $(OUT_DIR) $(OBJ_DIR) $(OBJ_DIR_TEST) $(IMAGE_DIR)

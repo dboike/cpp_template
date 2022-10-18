@@ -1,0 +1,5 @@
+Requires:
+ 2207  sudo apt install libcurl4
+ 2222  sudo apt install libcurl4-openssl-dev
+ 2225  sudo apt install libxml2-dev
+
